@@ -1,0 +1,11 @@
+g:\Projelerim\RentalFlow\RentFlowApplication\rentflow\backend\src\RentFlow.Contracts\bin\Debug\net8.0\RentFlow.Contracts.deps.json
+g:\Projelerim\RentalFlow\RentFlowApplication\rentflow\backend\src\RentFlow.Contracts\bin\Debug\net8.0\RentFlow.Contracts.dll
+g:\Projelerim\RentalFlow\RentFlowApplication\rentflow\backend\src\RentFlow.Contracts\bin\Debug\net8.0\RentFlow.Contracts.pdb
+g:\Projelerim\RentalFlow\RentFlowApplication\rentflow\backend\src\RentFlow.Contracts\obj\Debug\net8.0\RentFlow.Contracts.GeneratedMSBuildEditorConfig.editorconfig
+g:\Projelerim\RentalFlow\RentFlowApplication\rentflow\backend\src\RentFlow.Contracts\obj\Debug\net8.0\RentFlow.Contracts.AssemblyInfoInputs.cache
+g:\Projelerim\RentalFlow\RentFlowApplication\rentflow\backend\src\RentFlow.Contracts\obj\Debug\net8.0\RentFlow.Contracts.AssemblyInfo.cs
+g:\Projelerim\RentalFlow\RentFlowApplication\rentflow\backend\src\RentFlow.Contracts\obj\Debug\net8.0\RentFlow.Contracts.csproj.CoreCompileInputs.cache
+g:\Projelerim\RentalFlow\RentFlowApplication\rentflow\backend\src\RentFlow.Contracts\obj\Debug\net8.0\RentFlow.Contracts.dll
+g:\Projelerim\RentalFlow\RentFlowApplication\rentflow\backend\src\RentFlow.Contracts\obj\Debug\net8.0\refint\RentFlow.Contracts.dll
+g:\Projelerim\RentalFlow\RentFlowApplication\rentflow\backend\src\RentFlow.Contracts\obj\Debug\net8.0\RentFlow.Contracts.pdb
+g:\Projelerim\RentalFlow\RentFlowApplication\rentflow\backend\src\RentFlow.Contracts\obj\Debug\net8.0\ref\RentFlow.Contracts.dll
