@@ -1,6 +1,57 @@
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,visualstudio
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,visualstudio
 
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options
+.vs/
+.vscode/
+
+# Build outputs
+*.dll
+*.exe
+*.pdb
+*.cache
+*.editorconfig
+*.AssemblyInfo.cs
+*.AssemblyInfoInputs.cache
+*.assets.cache
+*.csproj.AssemblyReference.cache
+*.GeneratedMSBuildEditorConfig.editorconfig
+
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*CoverletSourceRootsMapping*
+
+# NuGet
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+project.assets.json
+*.nuget.dgspec.json
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json
@@ -414,5 +465,7 @@ FodyWeavers.xsd
 
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
+
+
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,visualstudio
