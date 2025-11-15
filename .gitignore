@@ -17,6 +17,32 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+# Build results
+**/[Bb]in/
+**/[Oo]bj/
+**/[Dd]ebug/
+**/[Rr]elease/
+
+# Build artifacts
+**/*.dll
+**/*.pdb
+**/*.cache
+**/*.txt
+**/*.editorconfig
+**/AssemblyInfo.cs
+**/AssemblyInfoInputs.cache
+**/assets.cache
+**/*.AssemblyReference.cache
+**/*.csproj.AssemblyReference.cache
+**/*.GeneratedMSBuildEditorConfig.editorconfig
+**/*.csproj.FileListAbsolute.txt
+**/project.nuget.cache
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
 # Visual Studio cache/options
 .vs/
 .vscode/
