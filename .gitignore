@@ -38,6 +38,50 @@ bld/
 **/*.csproj.FileListAbsolute.txt
 **/project.nuget.cache
 
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rtifacts/
+bin/
+obj/
+
+# Test Results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# NuGet
+*.nuget.props
+*.nuget.targets
+*.nuget.dgspec.json
+*.nuget.g.targets
+*.nuget.g.props
+project.nuget.cache
+project.assets.json
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Rider
+.idea/
+
+# Build caches
+*.AssemblyInfo.cs
+*.AssemblyInfoInputs.cache
+*.AssemblyReference.cache
+*.assets.cache
+*.csproj.nuget.dgspec.json
+*.GeneratedMSBuildEditorConfig.editorconfig
+*.msCoverageSourceRootsMapping*
+*CoverageSourceRootsMapping*
+
+# Office App
+web/OfficeApp/
+
 # .NET Core
 project.lock.json
 project.fragment.lock.json
