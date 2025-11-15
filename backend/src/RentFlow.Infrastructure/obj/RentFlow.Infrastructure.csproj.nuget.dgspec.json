@@ -1,7 +1,7 @@
 {
   "format": 1,
   "restore": {
-    "g:\\Projelerim\\RentalFlow\\RentFlowApplication\\rentflow\\backend\\src\\RentFlow.Infrastructure\\RentFlow.Infrastructure.csproj": {}
+    "G:\\Projelerim\\RentalFlow\\RentFlowApplication\\rentflow\\backend\\src\\RentFlow.Infrastructure\\RentFlow.Infrastructure.csproj": {}
   },
   "projects": {
     "G:\\Projelerim\\RentalFlow\\RentFlowApplication\\rentflow\\backend\\src\\RentFlow.Application\\RentFlow.Application.csproj": {
@@ -209,14 +209,14 @@
         }
       }
     },
-    "g:\\Projelerim\\RentalFlow\\RentFlowApplication\\rentflow\\backend\\src\\RentFlow.Infrastructure\\RentFlow.Infrastructure.csproj": {
+    "G:\\Projelerim\\RentalFlow\\RentFlowApplication\\rentflow\\backend\\src\\RentFlow.Infrastructure\\RentFlow.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "g:\\Projelerim\\RentalFlow\\RentFlowApplication\\rentflow\\backend\\src\\RentFlow.Infrastructure\\RentFlow.Infrastructure.csproj",
+        "projectUniqueName": "G:\\Projelerim\\RentalFlow\\RentFlowApplication\\rentflow\\backend\\src\\RentFlow.Infrastructure\\RentFlow.Infrastructure.csproj",
         "projectName": "RentFlow.Infrastructure",
-        "projectPath": "g:\\Projelerim\\RentalFlow\\RentFlowApplication\\rentflow\\backend\\src\\RentFlow.Infrastructure\\RentFlow.Infrastructure.csproj",
+        "projectPath": "G:\\Projelerim\\RentalFlow\\RentFlowApplication\\rentflow\\backend\\src\\RentFlow.Infrastructure\\RentFlow.Infrastructure.csproj",
         "packagesPath": "C:\\Users\\onurk\\.nuget\\packages\\",
-        "outputPath": "g:\\Projelerim\\RentalFlow\\RentFlowApplication\\rentflow\\backend\\src\\RentFlow.Infrastructure\\obj\\",
+        "outputPath": "G:\\Projelerim\\RentalFlow\\RentFlowApplication\\rentflow\\backend\\src\\RentFlow.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
