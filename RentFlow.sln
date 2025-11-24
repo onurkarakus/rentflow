@@ -32,6 +32,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentFlow.Infrastructure.Tests", "backend\tests\RentFlow.Infrastructure.Tests\RentFlow.Infrastructure.Tests.csproj", "{92A5E1BF-156A-4E43-B9C3-80D93A04585F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{208BA388-4CEE-2CBF-559C-5607C099C1F8}"
+	ProjectSection(SolutionItems) = preProject
+		docs\COPILOT_CONTEXT.md = docs\COPILOT_CONTEXT.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PRD", "PRD", "{6B9BE2B0-5C36-9539-68BB-FB8DEFEBE1F4}"
 	ProjectSection(SolutionItems) = preProject

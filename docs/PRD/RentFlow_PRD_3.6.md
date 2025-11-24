@@ -1,7 +1,7 @@
 # **Ürün Gereksinim Dokümanı (PRD) – RentFlow**
 
-Versiyon: 3.6 (Operasyonel Detaylar Eklendi)  
-Tarih: 20.09.2025
+Versiyon: 3.7 (Araç Başı Fiyatlandırma Modeli Detaylandırıldı)  
+Tarih: 24.11.2025
 
 ## **1\) Genel Bakış (TL;DR)**
 
@@ -168,14 +168,128 @@ Bu bölüm, sistemdeki önemli olaylar karşısında hangi kullanıcıların, ha
 
 ## **7\) Veri Modeli**
 
-* **Ana Varlıklar:** Tenants, Users, Plans, Vehicles, Customers, Bookings.  
-* **Mobil Akışlar İçin Varlıklar:** Deliveries, DeliveryPhotos, DeliveryReports.  
-* **Önemli Kurallar:**  
-  * Aynı araç için zaman aralıkları çakışamaz.  
-  * Demo limitleri aşılamaz.  
-  * Teslim/iade için 4 zorunlu açıdan fotoğraf çekilmelidir.  
-  * 'Bakımda' (Maintenance) olan bir araç için yeni rezervasyon oluşturulamaz.  
-  * Her kullanıcı sadece kendi kiracısının (tenant) verisine erişebilir.
+### **7.1 Ana Varlıklar**
+* **Tenants:** Kiracı bilgileri (şirket adı, iletişim bilgileri, durum).
+* **SubscriptionPlans:** Abonelik planı tanımları (araç limitleri, fiyatlandırma).
+* **SubscriptionHistory:** Tenant'ın abonelik geçmişi ve ödeme kayıtları.
+* **Users:** Kullanıcı bilgileri ve rolleri.
+* **Vehicles:** Araç bilgileri.
+* **Customers:** Müşteri bilgileri.
+* **Bookings:** Rezervasyon kayıtları.
+
+### **7.2 Mobil Akışlar İçin Varlıklar**
+* **Deliveries:** Teslim/iade işlemleri.
+* **DeliveryPhotos:** Teslim/iade fotoğrafları.
+* **DeliveryReports:** PDF tutanakları.
+
+### **7.3 Araç Başı Fiyatlandırma Modeli - Veri Yapısı**
+
+RentFlow'un fiyatlandırma modeli **araç sayısı bazlıdır**. Bu model, hem işletmeler için basit ve şeffaf bir fiyatlandırma sunar, hem de platform için detaylı iş analitiği ve gelir takibi sağlar.
+
+#### **7.3.1 SubscriptionPlan (Plan Tanımı)**
+
+Her abonelik planı, belirli bir araç aralığını kapsar ve ilgili fiyatlandırmayı içerir:
+
+SubscriptionPlan 
+├─ Id: Guid (Benzersiz plan kimliği) 
+├─ Name: string (Örn. "Başlangıç", "Profesyonel") 
+├─ MinVehicles: int (Plan için minimum araç sayısı, örn. 1) 
+├─ MaxVehicles: int? (Plan için maksimum araç sayısı, örn. 5, null = sınırsız) 
+├─ MonthlyPrice: decimal (Aylık plan bedeli, örn. ₺499) 
+├─ AnnualPrice: decimal (Yıllık plan bedeli, genellikle indirimli) 
+├─ PerVehiclePrice: decimal? (Limit aşımı için araç başı ücret, örn. ₺60) 
+├─ IsDemo: bool (Demo planı mı?) 
+├─ TrialDays: int (Deneme süresi gün sayısı) 
+└─ IsActive: bool (Plan aktif mi?)
+
+
+**Örnekler:**
+- **Demo Plan:** MinVehicles=1, MaxVehicles=1, MonthlyPrice=₺0, TrialDays=7
+- **Başlangıç Plan:** MinVehicles=1, MaxVehicles=5, MonthlyPrice=₺499
+- **Profesyonel Plan:** MinVehicles=6, MaxVehicles=20, MonthlyPrice=₺1.499, PerVehiclePrice=₺60
+  - Eğer tenant 23 araç kullanıyorsa: ₺1.499 + (3 × ₺60) = ₺1.679/ay
+
+#### **7.3.2 SubscriptionHistory (Abonelik Geçmişi)**
+
+Her abonelik dönemi, değişiklik veya ödeme için ayrı bir kayıt oluşturulur. Bu yapı, şu bilgileri detaylı şekilde tutar:
+
+SubscriptionHistory 
+├─ Id: Guid 
+├─ TenantId: Guid (Hangi tenant'a ait?) 
+├─ SubscriptionPlanId: Guid (Hangi plan?) 
+├─ StartDate: DateTime (Dönem başlangıç tarihi) 
+├─ EndDate: DateTime? (Dönem bitiş tarihi) 
+├─ IsActive: bool (Şu an aktif dönem mi?) 
+│ 
+├─ VehicleCountAtStart: int (Dönem başındaki araç sayısı) ⭐ 
+├─ VehicleCountAtEnd: int? (Dönem sonundaki araç sayısı) ⭐ 
+│ 
+├─ BasePlanPrice: decimal (Plan temel fiyatı, örn. ₺1.499) ⭐ 
+├─ AdditionalVehicleCharges: decimal (Limit aşımı ücreti) ⭐ 
+├─ TotalAmount: decimal (Toplam tutar = Base + Additional) ⭐ 
+│ 
+├─ BillingCycle: enum (Monthly, Annual) 
+├─ Currency: string (Para birimi, örn. "TRY") 
+├─ PaymentStatus: enum (Pending, Paid, Failed, Refunded, Cancelled) 
+├─ PaymentDate: DateTime? ├─ PaymentMethod: string? 
+├─ TransactionId: string? (Iyzico transaction ID) 
+├─ InvoiceNumber: string? 
+│ 
+├─ ChangeType: enum (NewSubscription, Renewal, Upgrade, Downgrade, 
+│   Cancellation, VehicleCountIncrease, VehicleCountDecrease) ⭐ 
+├─ ChangeReason: string? 
+├─ PreviousSubscriptionPlanId: Guid? (Önceki plan, upgrade/downgrade için) 
+├─ ProratedCredit: decimal? (Önceki plandan aktarılan kredi) 
+│ 
+└─ CancellationDate: DateTime?
+
+
+**⭐ İşaretli alanlar** araç başı fiyatlandırma için kritik öneme sahiptir.
+
+#### **7.3.3 Neden Bu Alanlar Gerekli?**
+
+#### **1. Faturalama ve Gelir Hesaplama**
+- `BasePlanPrice` ve `AdditionalVehicleCharges` sayesinde fatura kalemleri otomatik oluşturulur.
+- Örnek fatura:
+
+Profesyonel Plan (6-20 araç)     ₺1.499,00 Ek Araç Ücreti (3 araç × ₺60)     ₺180,00 KDV (%20)                          ₺335,80 ───────────────────────────────────────── Toplam                           ₺2.014,80
+
+
+#### **2. Müşteri Davranışı ve Büyüme Analizi**
+- `VehicleCountAtStart` ve `VehicleCountAtEnd` ile tenant'ın büyüme hızı izlenir.
+- Örnek: 3 araçtan 23 araca 5 ayda büyümüş → Aylık 4 araç büyüme = Sağlıklı müşteri.
+- Araç sayısı düşen tenant'lar **churn riski** taşır ve proaktif müdahale gerektirir.
+
+#### **3. Prorated (Günlük) Hesaplama**
+- Tenant ayın ortasında plan değiştirdiğinde, kalan günler için adil fiyatlandırma yapılır.
+- `ProratedCredit` alanı, eski plandan kalan tutarı yeni plana aktarır.
+- Örnek: 15 gün kala Başlangıç'tan Profesyonel'e geçiş → Eski plandan ₺249 kredi.
+
+#### **4. SaaS Business Metrics**
+- **MRR (Monthly Recurring Revenue):** `Sum(TotalAmount)` where `IsActive = true`
+- **Expansion MRR:** `Sum(AdditionalVehicleCharges)` - Mevcut müşterilerden gelen büyüme
+- **ARPU (Average Revenue Per Unit):** `TotalAmount / VehicleCountAtStart` - Araç başına ortalama gelir
+- **Churn Prediction:** `VehicleCountAtEnd < VehicleCountAtStart` - Daralma riski
+
+#### **5. Raporlama Örnekleri**
+
+CEO Dashboard (Ocak 2025):
+📊 Gelir Raporu 
+├─ Toplam Gelir: ₺125.400 
+├─ Base Plan Geliri: ₺98.500 (78%) 
+├─ Overflow Geliri: ₺26.900 (22%) ← Büyüme göstergesi! 
+├─ Toplam Araç: 1.847 araç 
+└─ ARPU: ₺67,9/araç
+
+### **7.4 İş Kuralları**
+
+* **Çakışma Önleme:** Aynı araç için zaman aralıkları çakışamaz.  
+* **Demo Limitleri:** Demo hesabı yalnızca 1 araç ekleyebilir ve 7 gün kullanabilir.  
+* **Araç Limiti Kontrolü:** Tenant, planının `MaxVehicles` limitini aşan araç ekleyemez (ya da `PerVehiclePrice` uygulanır).
+* **Fotoğraf Zorunluluğu:** Teslim/iade için 4 zorunlu açıdan fotoğraf çekilmelidir.  
+* **Bakım Durumu:** 'Bakımda' (Maintenance) olan bir araç için yeni rezervasyon oluşturulamaz.  
+* **Multi-Tenancy:** Her kullanıcı sadece kendi kiracısının (tenant) verisine erişebilir.
+* **Abonelik Geçmişi:** Bir tenant için aynı anda yalnızca bir `SubscriptionHistory` kaydı `IsActive=true` olabilir.
 
 ## **8\) Teknik Mimari ve Gereksinimler**
 
@@ -226,9 +340,84 @@ Başarı metriklerini doğru ölçebilmek için aşağıdaki temel kullanıcı o
 
 ## **12\) Fiyatlandırma**
 
-* **Temel Paket:** ₺1.490/ay (10 araç, 3 kullanıcı limiti).  
-* **Profesyonel Paket:** ₺2.990/ay (30 araç, 8 kullanıcı limiti).  
-* **Kurumsal Paket:** ₺5.990/ay (Sınırsız araç, 15 kullanıcı limiti).
+### **12.1 Fiyatlandırma Tablosu**
+
+┌─────────────────┬─────────────┬──────────────┬─────────────────┐ 
+│ Paket           │ Araç Sayısı │ Aylık Fiyat  │ Araç Başı Fiyat │ 
+├─────────────────┼─────────────┼──────────────┼─────────────────┤ 
+│ 🚗 Demo         │ 1 araç      │ ₺0 (7 gün)   │ -               │ 
+│ 🚙 Başlangıç    │ 1-5 araç    │ ₺499         │ ~₺100/araç      │ 
+│ 🚐 Profesyonel  │ 6-20 araç   │ ₺1.499       │ ~₺75/araç       │ 
+│ 🚌 Kurumsal     │ 21-50 araç  │ ₺2.999       │ ~₺60/araç       │ 
+│ 🏢 Enterprise   │ 50+ araç    │ Özel Fiyat   │ Negotiate       │ 
+└─────────────────┴─────────────┴──────────────┴─────────────────┘
+
+
+### **12.2 Fiyatlandırma Mantığı**
+
+**Temel İlkeler:**
+1. **Basitlik:** Kullanıcılar "kaç aracım var = ne kadar ödüyorum" hesabını kolayca yapabilir.
+2. **Volume Discount:** Araç sayısı arttıkça araç başına düşen maliyet azalır.
+3. **Esneklik:** Kullanıcı sayısına limit yok, sadece araç sayısı önemli.
+4. **Büyüme Teşviki:** Küçük ofisler düşük başlangıç maliyetiyle başlar, büyüdükçe doğal olarak plan yükseltir.
+
+**Limit Aşımı Politikası:**
+- **Profesyonel Plan** örneği: 6-20 araç için ₺1.499/ay. Eğer tenant 23 araç kullanıyorsa:
+  - Base Plan: ₺1.499
+  - Ek 3 araç: 3 × ₺60 = ₺180
+  - **Toplam: ₺1.679/ay**
+- Bu politika sayesinde tenant, hemen plan değiştirmek zorunda kalmadan geçici büyüme dönemlerinde esneklik kazanır.
+
+**Yıllık Abonelik İndirimi:**
+- Tüm planlar için yıllık ödemede **%17 indirim** uygulanır.
+- Örnek: Profesyonel Plan aylık ₺1.499 × 12 = ₺17.988 → Yıllık ₺14.990 (₺3.000 tasarruf)
+
+### **12.3 Plan Değişikliği Senaryoları**
+
+**Senaryo 1: Demo → Başlangıç (3 araç)**
+
+Durum: Demo süresi bitti veya 2. araç eklenmeye çalışılıyor 
+Aksiyon: "Başlangıç planına geçin, 5 araca kadar ₺499/ay" 
+Sonuç: Ödeme başarılı → Tenant.Status = Active, CurrentVehicleCount = 3
+
+**Senaryo 2: Başlangıç → Profesyonel (6. araç ekleniyor)**
+
+Durum: 5 araçlık limitte, kullanıcı 6. aracı eklemek istiyor 
+Aksiyon: "Profesyonel plana yükseltin, 20 araca kadar ₺1.499/ay" 
+Prorated: Kalan 15 gün için eski plandan ₺249 kredi Ödeme: (₺1.499/30 × 15) - ₺249 = ₺500 
+Sonuç: SubscriptionHistory kaydı oluşturulur (ChangeType=Upgrade)
+
+**Senaryo 3: Profesyonel → Limit Aşımı (23 araç)**
+
+Durum: 20 araçlık limitte, kullanıcı 21-23 arası araç ekliyor 
+Aksiyon: Otomatik ek ücret hesaplanır Hesaplama: Base ₺1.499 + (3 × ₺60) = ₺1.679/ay 
+Sonuç: Bir sonraki fatura döneminde yeni tutar yansır 
+Bildirim: "Limit aşımı nedeniyle ek ücret uygulanacak. Kurumsal plana geçerek tasarruf edebilirsiniz."
+
+
+### **12.4 İş Avantajları**
+
+**Müşteri Açısından:**
+- ✅ Net ve anlaşılır fiyatlandırma
+- ✅ Kullanıcı sayısı sınırı yok
+- ✅ Küçük başlangıç maliyeti (₺499)
+- ✅ Büyüdükçe araç başına maliyet düşer
+
+**Platform Açısından:**
+- ✅ Öngörülebilir gelir (MRR)
+- ✅ Upsell fırsatları (araç sayısı artışı)
+- ✅ Churn analizi (araç sayısı azalması = risk)
+- ✅ Expansion MRR takibi (mevcut müşteri büyümesi)
+
+┌─────────────────┬─────────────┬──────────────┬─────────────────┐
+│ Paket           │ Araç Sayısı │ Aylık Fiyat  │ Araç Başı Fiyat │
+├─────────────────┼─────────────┼──────────────┼─────────────────┤
+│ 🚗 Demo         │ 1 araç      │ ₺0 (7 gün)   │ -               │
+│ 🚙 Başlangıç    │ 1-5 araç    │ ₺499         │ ~₺100/araç      │
+│ 🚐 Profesyonel  │ 6-20 araç   │ ₺1.499       │ ~₺75/araç       │
+│ 🚌 Kurumsal     │ 21-50 araç  │ ₺2.999       │ ~₺60/araç       │
+│ 🏢 Enterprise   │ 50+ araç    │ Özel Fiyat   │ Negotiate       │
+└─────────────────┴─────────────┴──────────────┴─────────────────┘
 
 ## **13\) Riskler ve Azaltma Stratejileri**
 
@@ -316,3 +505,7 @@ Bu bölüm, beklenmedik durumlar veya hatalar karşısında sistemin nasıl davr
 4. **Faz 4 \- Finansal Entegrasyonlar:** Muhasebe programları ve **E-fatura / E-arşiv** sistemleri ile entegrasyon.  
 5. **Faz 5 \- Büyüme Motoru: Son Kullanıcıya Ulaşım:** Son kullanıcıların rezervasyon yapabileceği **halka açık bir web sitesi ve mobil uygulamanın** geliştirilmesi.  
 6. **Faz 6 \- Gelişmiş İş Zekası (BI):** Trend analizi, talep tahmini gibi **gelişmiş BI ve raporlama** yeteneklerinin sunulması.
+
+**Değişiklik Geçmişi:**
+- **v3.7 (24.11.2025):** Araç başı fiyatlandırma modelinin veri yapısı detaylandırıldı. Bölüm 7.3 ve Bölüm 12 genişletildi. SubscriptionHistory alanlarının iş değeri açıklandı.
+- **v3.6 (20.09.2025):** Operasyonel detaylar eklendi.
